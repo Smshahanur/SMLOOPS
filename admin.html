@@ -1,0 +1,727 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SMLOOP Admin</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<style>
+:root{
+  --bg:#f4f5fb;
+  --card:rgba(255,255,255,.92);
+  --text:#2f3340;
+  --muted:#7d8394;
+  --line:#e9eaf1;
+  --purple:#6246b8;
+  --purple-soft:#f0edff;
+  --blue:#2f78d4;
+  --green:#1fa971;
+  --orange:#ee9a24;
+  --red:#e74d5a;
+  --gold:#d7a21a;
+  --shadow:0 14px 40px rgba(55,45,90,.08);
+}
+*{box-sizing:border-box;margin:0;padding:0;font-family:Arial,Helvetica,sans-serif}
+body{background:linear-gradient(180deg,#f8f7ff 0%,var(--bg) 48%,#f7f8fb 100%);color:var(--text);min-height:100vh}
+.hidden{display:none!important}
+button,input,textarea,select{font:inherit}
+button{border:0;cursor:pointer}
+button:disabled{opacity:.55;cursor:not-allowed}
+input,textarea,select{
+  width:100%;border:1px solid var(--line);background:#fff;color:var(--text);
+  border-radius:14px;padding:14px 15px;outline:none;transition:.2s
+}
+input:focus,textarea:focus,select:focus{border-color:#9d8ce1;box-shadow:0 0 0 4px rgba(98,70,184,.08)}
+textarea{resize:vertical;min-height:110px}
+.small{font-size:12px;color:var(--muted)}
+
+/* LOGIN */
+#loginPage{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:22px}
+.login-box{
+  width:min(100%,410px);padding:32px;border-radius:28px;background:var(--card);
+  box-shadow:0 22px 70px rgba(67,48,126,.14);border:1px solid rgba(255,255,255,.9)
+}
+.login-mark{width:58px;height:58px;border-radius:20px;background:linear-gradient(135deg,#7c61d7,#4e35a8);display:grid;place-items:center;color:#fff;font-size:25px;margin:0 auto 18px}
+.login-box h1{text-align:center;font-size:29px;margin-bottom:7px}
+.login-box p{text-align:center;color:var(--muted);margin-bottom:25px}
+.login-btn,.primary-btn{
+  width:100%;padding:14px 18px;border-radius:14px;color:#fff;font-weight:700;
+  background:linear-gradient(135deg,#7458cd,#5237ad);box-shadow:0 10px 24px rgba(98,70,184,.2)
+}
+#loginMessage{text-align:center;margin-top:14px;min-height:20px}
+
+/* APP */
+.topbar{
+  position:sticky;top:0;z-index:20;background:rgba(255,255,255,.86);backdrop-filter:blur(16px);
+  border-bottom:1px solid rgba(226,226,236,.85);padding:14px 5%;display:flex;align-items:center;justify-content:space-between
+}
+.brand{display:flex;align-items:center;gap:10px;font-weight:800;color:#4f398f;font-size:22px}
+.brand-dot{width:12px;height:12px;border-radius:50%;background:#7359ca;box-shadow:0 0 0 6px #f0ecff}
+.logout-btn{padding:10px 15px;border-radius:12px;background:#fff0f1;color:#d94352;font-weight:700;border:1px solid #ffdadd}
+.container{max-width:1160px;margin:auto;padding:28px 18px 70px}
+.welcome{margin-bottom:18px}
+.welcome h2{font-size:29px;margin-bottom:7px}
+.welcome p{color:var(--muted);line-height:1.55}
+
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:18px 0 20px}
+.stat{
+  background:var(--card);border:1px solid rgba(235,236,243,.9);border-radius:20px;padding:16px;
+  box-shadow:var(--shadow)
+}
+.stat .stat-num{font-size:24px;font-weight:800;margin-bottom:4px}
+.stat .stat-label{font-size:12px;color:var(--muted)}
+
+.toolbar-card,.form-box{
+  background:var(--card);border:1px solid rgba(235,236,243,.95);border-radius:22px;box-shadow:var(--shadow)
+}
+.toolbar-card{padding:14px;margin-bottom:18px}
+.toolbar-top{display:flex;gap:10px}
+.search-wrap{position:relative;flex:1}
+.search-wrap span{position:absolute;left:15px;top:50%;transform:translateY(-50%);font-size:17px}
+.search-wrap input{padding-left:43px;margin:0;background:#fafaff}
+.add-open-btn{width:auto;padding:0 18px;border-radius:14px;background:var(--purple);color:#fff;font-weight:700}
+.filter-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.chip{
+  width:auto;padding:9px 13px;border-radius:999px;background:#f5f4f9;color:#686d7a;
+  border:1px solid #e9e8f0;font-size:13px
+}
+.chip.active{background:var(--purple-soft);color:var(--purple);border-color:#d9d0ff;font-weight:700}
+
+.form-box{padding:22px;margin-bottom:20px}
+.form-heading{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px}
+.form-heading h3{font-size:20px}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.form-grid .full{grid-column:1/-1}
+.form-actions{display:flex;gap:10px;margin-top:12px}
+.secondary-btn{padding:13px 18px;border-radius:14px;background:#f1f2f6;color:#5c6270;font-weight:700}
+.form-actions .primary-btn{flex:1}
+
+.section-head{display:flex;align-items:end;justify-content:space-between;margin:22px 0 15px}
+.section-head h3{font-size:22px}
+.section-head span{font-size:13px;color:var(--muted)}
+
+.tools-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(255px,1fr));gap:16px}
+.tool-card{
+  position:relative;background:var(--card);border:1px solid rgba(235,236,243,.95);border-radius:24px;
+  padding:19px;box-shadow:var(--shadow);transition:transform .2s,box-shadow .2s
+}
+.tool-card:hover{transform:translateY(-2px);box-shadow:0 18px 45px rgba(55,45,90,.12)}
+.tool-top{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
+.position-badge{display:inline-flex;padding:6px 10px;border-radius:999px;background:var(--purple-soft);color:#6246b8;font-size:11px;font-weight:700}
+.more-btn{
+  position:relative;z-index:5;touch-action:manipulation;user-select:none;
+  width:40px;height:40px;border-radius:13px;background:#f7f7fb;color:#606573;font-size:22px;line-height:1
+}
+.tool-card h3{font-size:18px;margin:14px 0 8px}
+.tool-card p{color:#737988;font-size:14px;line-height:1.5;min-height:42px}
+.meta-row{display:flex;gap:6px;flex-wrap:wrap;margin:16px 0 0}
+.meta{font-size:10px;padding:5px 8px;border-radius:999px;background:#f3f4f7;color:#717786}
+.meta.featured{background:#fff5d7;color:#a47700}
+.meta.hidden-meta{background:#ffecef;color:#c64a59}
+.manage-hint{font-size:11px;color:#9aa0ad;margin-top:14px}
+
+.empty,.loading{
+  grid-column:1/-1;background:var(--card);border:1px solid rgba(235,236,243,.95);border-radius:22px;
+  padding:42px 22px;text-align:center;color:var(--muted);box-shadow:var(--shadow)
+}
+
+/* OVERLAY + BOTTOM SHEETS */
+.overlay{
+  position:fixed;inset:0;background:rgba(29,31,42,.42);backdrop-filter:blur(4px);z-index:80;
+  opacity:0;pointer-events:none;transition:.25s
+}
+.overlay.show{opacity:1;pointer-events:auto}
+.sheet{
+  position:fixed;left:0;right:0;bottom:0;z-index:90;max-width:760px;margin:auto;
+  background:#fff;border-radius:28px 28px 0 0;padding:14px 18px calc(22px + env(safe-area-inset-bottom));
+  box-shadow:0 -18px 60px rgba(20,20,40,.18);transform:translateY(105%);transition:transform .3s ease
+}
+.sheet.show{transform:translateY(0)}
+.sheet-handle{width:44px;height:5px;border-radius:99px;background:#dfe1e8;margin:0 auto 17px}
+.sheet-title{font-size:21px;margin-bottom:4px}
+.sheet-subtitle{font-size:13px;color:var(--muted);margin-bottom:18px}
+.sheet-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.action-tile{
+  padding:17px 14px;border-radius:18px;background:#f7f7fb;border:1px solid #ececf2;text-align:left;
+  color:var(--text);font-weight:700
+}
+.action-tile .icon{font-size:20px;display:block;margin-bottom:7px}
+.action-tile.danger{color:#d94a57;background:#fff6f7}
+.action-tile.gold{color:#a57a08;background:#fffaf0}
+.sheet-close{margin-top:14px;width:100%;padding:14px;border-radius:14px;background:#f0f1f5;color:#646a78;font-weight:700}
+
+/* MOVE */
+.move-summary{
+  display:flex;align-items:center;justify-content:space-between;gap:12px;background:#f8f7ff;border:1px solid #ece9ff;
+  padding:14px;border-radius:18px;margin-bottom:14px
+}
+.move-summary strong{display:block;margin-bottom:4px}
+.current-pill{font-size:12px;padding:7px 10px;border-radius:999px;background:#fff;color:#6246b8;border:1px solid #e4ddff}
+.quick-row{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:16px}
+.quick-btn{padding:12px 8px;border-radius:14px;background:#f6f7fa;color:#5f6574;border:1px solid #eceef4;font-weight:700;font-size:13px}
+.quick-btn.active{background:var(--purple-soft);color:var(--purple);border-color:#d9d0ff}
+.position-label{display:flex;justify-content:space-between;align-items:center;margin:10px 0;font-size:14px;font-weight:700}
+.position-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:8px;max-height:310px;overflow:auto;padding:2px}
+.position-btn{
+  padding:12px 5px;border-radius:13px;background:#f6f7fa;color:#666c79;font-weight:700;border:1px solid transparent
+}
+.position-btn.selected{background:var(--purple);color:#fff;box-shadow:0 8px 20px rgba(98,70,184,.2)}
+.move-preview{margin:14px 0;padding:12px 14px;border-radius:14px;background:#f6fbf8;color:#4d7762;font-size:13px}
+.sheet-bottom-actions{display:flex;gap:10px}
+.sheet-bottom-actions button{flex:1;padding:14px;border-radius:14px;font-weight:700}
+.confirm-move{background:var(--purple);color:#fff}
+
+/* CONFIRM */
+.confirm-box{background:#fff7f8;border:1px solid #ffe1e4;border-radius:18px;padding:15px;color:#7d3d47;line-height:1.5;margin-bottom:14px}
+.confirm-actions{display:flex;gap:10px}
+.confirm-actions button{flex:1;padding:14px;border-radius:14px;font-weight:700}
+.confirm-delete{background:var(--red);color:#fff}
+
+.toast{
+  position:fixed;left:50%;bottom:26px;transform:translate(-50%,130px);z-index:130;
+  background:#303342;color:#fff;padding:12px 17px;border-radius:14px;box-shadow:0 12px 30px rgba(0,0,0,.18);
+  opacity:0;transition:.28s;max-width:90%;text-align:center;font-size:14px
+}
+.toast.show{transform:translate(-50%,0);opacity:1}
+
+@media(max-width:700px){
+  .container{padding:22px 13px 55px}
+  .topbar{padding:13px 16px}
+  .welcome h2{font-size:25px}
+  .stats-grid{grid-template-columns:repeat(2,1fr)}
+  .form-grid{grid-template-columns:1fr}
+  .form-grid .full{grid-column:auto}
+  .tools-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:11px}
+  .tool-card{padding:15px;border-radius:20px}
+  .tool-card h3{font-size:16px}
+  .tool-card p{font-size:12px;min-height:54px}
+  .toolbar-top{align-items:stretch}
+  .add-open-btn{padding:0 13px}
+  .position-grid{grid-template-columns:repeat(5,1fr)}
+}
+@media(max-width:420px){
+  .tools-grid{grid-template-columns:1fr}
+  .position-grid{grid-template-columns:repeat(5,1fr)}
+}
+</style>
+</head>
+<body>
+
+<div id="loginPage">
+  <div class="login-box">
+    <div class="login-mark">∞</div>
+    <h1>SMLOOP</h1>
+    <p>Sign in to your calm workspace.</p>
+    <input type="email" id="email" placeholder="Admin Email">
+    <input type="password" id="password" placeholder="Password">
+    <button class="login-btn" id="loginBtn" onclick="login()">Login</button>
+    <div id="loginMessage"></div>
+  </div>
+</div>
+
+<div id="adminPage" class="hidden">
+  <header class="topbar">
+    <div class="brand"><span class="brand-dot"></span>SMLOOP Admin</div>
+    <button class="logout-btn" onclick="logout()">Logout</button>
+  </header>
+
+  <main class="container">
+    <section class="welcome">
+      <h2>Manage your tools with ease</h2>
+      <p>Everything important is close by. Keep the workspace calm, organized and simple.</p>
+    </section>
+
+    <section class="stats-grid">
+      <div class="stat"><div class="stat-num" id="totalCount">0</div><div class="stat-label">Total tools</div></div>
+      <div class="stat"><div class="stat-num" id="visibleCount">0</div><div class="stat-label">Visible</div></div>
+      <div class="stat"><div class="stat-num" id="hiddenCount">0</div><div class="stat-label">Hidden</div></div>
+      <div class="stat"><div class="stat-num" id="featuredCount">0</div><div class="stat-label">Featured</div></div>
+    </section>
+
+    <section class="toolbar-card">
+      <div class="toolbar-top">
+        <div class="search-wrap"><span>⌕</span><input id="adminSearch" placeholder="Search your tools..." oninput="renderTools()"></div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="add-open-btn" onclick="syncMissingTools()">⚡ Sync Missing</button><button class="add-open-btn" onclick="openAddForm()">＋ Add</button></div>
+      </div>
+      <div class="filter-row" id="filterRow">
+        <button class="chip active" data-filter="all">All Tools</button>
+        <button class="chip" data-filter="PDF">📄 PDF Tools</button>
+        <button class="chip" data-filter="Image">🖼️ Image Tools</button>
+        <button class="chip" data-filter="Useful">🛠️ Useful Tools</button>
+        <button class="chip" data-filter="visible">Visible</button>
+        <button class="chip" data-filter="hidden">Hidden</button>
+        <button class="chip" data-filter="featured">Featured</button>
+      </div>
+    </section>
+
+    <section id="formBox" class="form-box hidden">
+      <div class="form-heading">
+        <div>
+          <h3 id="formTitle">Add New Tool</h3>
+          <div class="small">Create or update a tool.</div>
+        </div>
+      </div>
+      <input type="hidden" id="editId">
+      <div class="form-grid">
+        <input id="toolName" placeholder="Tool Name">
+        <input id="toolIcon" placeholder="Tool Icon (emoji, e.g. 🗜️)">
+        <select id="toolCategory">
+          <option value="PDF">📄 PDF Tools</option>
+          <option value="Image">🖼️ Image Tools</option>
+          <option value="Useful">🛠️ Useful Tools</option>
+        </select>
+        <textarea id="toolDescription" class="full" placeholder="Tool Description"></textarea>
+      </div>
+      <div class="form-actions">
+        <button class="secondary-btn" onclick="cancelEdit()">Cancel</button>
+        <button class="primary-btn" id="saveBtn" onclick="saveTool()">Add Tool</button>
+      </div>
+    </section>
+
+    <section class="section-head">
+      <div><h3>All Tools</h3><span id="resultCount">0 tools</span></div>
+      <span>Tap ••• to manage</span>
+    </section>
+
+    <div id="toolsList" class="tools-grid">
+      <div class="loading">Loading your tools...</div>
+    </div>
+  </main>
+</div>
+
+<div id="overlay" class="overlay" onclick="closeAllSheets()"></div>
+
+<section id="manageSheet" class="sheet" aria-hidden="true">
+  <div class="sheet-handle"></div>
+  <h3 class="sheet-title" id="manageToolName">Manage Tool</h3>
+  <p class="sheet-subtitle" id="manageToolInfo">Choose an action.</p>
+  <div class="sheet-actions">
+    <button class="action-tile" onclick="startEditFromManage()"><span class="icon">✏️</span>Edit Tool</button>
+    <button class="action-tile" onclick="openMoveSheet()"><span class="icon">↕️</span>Move Tool</button>
+    <button class="action-tile" id="visibilityAction" onclick="toggleManagedVisibility()"><span class="icon">👁️</span><span id="visibilityActionText">Hide Tool</span></button>
+    <button class="action-tile gold" id="featuredAction" onclick="toggleManagedFeatured()"><span class="icon">⭐</span><span id="featuredActionText">Feature Tool</span></button>
+    <button class="action-tile danger" onclick="openDeleteSheet()"><span class="icon">🗑️</span>Delete Tool</button>
+  </div>
+  <button class="sheet-close" onclick="closeAllSheets()">Close</button>
+</section>
+
+<section id="moveSheet" class="sheet" aria-hidden="true">
+  <div class="sheet-handle"></div>
+  <h3 class="sheet-title">Move Tool</h3>
+  <div class="move-summary">
+    <div><strong id="moveToolName">Tool</strong><span class="small">Choose where you want it to appear.</span></div>
+    <span class="current-pill" id="currentPositionPill">Now: 1</span>
+  </div>
+  <div class="quick-row">
+    <button class="quick-btn" onclick="selectMovePosition(1)">⇡ First</button>
+    <button class="quick-btn" onclick="selectMovePosition(Math.min(3, currentTools.length))">↥ Top 3</button>
+    <button class="quick-btn" onclick="selectMovePosition(currentTools.length)">⇣ Last</button>
+  </div>
+  <div class="position-label"><span>Select exact position</span><span id="selectedPositionText">Position 1</span></div>
+  <div id="positionGrid" class="position-grid"></div>
+  <div class="move-preview" id="movePreview">The tool will move to the selected position.</div>
+  <div class="sheet-bottom-actions">
+    <button class="secondary-btn" onclick="closeAllSheets()">Cancel</button>
+    <button class="confirm-move" id="confirmMoveBtn" onclick="confirmMove()">Move Here</button>
+  </div>
+</section>
+
+<section id="deleteSheet" class="sheet" aria-hidden="true">
+  <div class="sheet-handle"></div>
+  <h3 class="sheet-title">Delete Tool?</h3>
+  <p class="sheet-subtitle" id="deleteToolName">This action needs confirmation.</p>
+  <div class="confirm-box">This will remove the tool from the database and then close the gap in the tool order.</div>
+  <div class="confirm-actions">
+    <button class="secondary-btn" onclick="closeAllSheets()">Keep Tool</button>
+    <button class="confirm-delete" id="confirmDeleteBtn" onclick="confirmDelete()">Delete Tool</button>
+  </div>
+</section>
+
+<div id="toast" class="toast"></div>
+
+<script>
+const SUPABASE_URL = "https://gegzvayhffbzzrbkeccw.supabase.co";
+const SUPABASE_ANON_KEY = "sb_publishable_zGQ1ZuA6BWJhcWRGY1fqsw_ocdFkjac";
+const ADMIN_EMAIL = "shahanurmollah1@gmail.com";
+const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+let currentTools = [];
+let activeFilter = "all";
+let managedToolId = null;
+let selectedMovePosition = null;
+let toastTimer = null;
+
+function normalizeCategory(category){
+  const c=String(category||"").trim().toLowerCase();
+  if(c.includes("image")) return "Image";
+  if(c.includes("useful") || c.includes("qr") || c.includes("barcode")) return "Useful";
+  return "PDF";
+}
+
+window.addEventListener("DOMContentLoaded", async () => {
+  const { data } = await supabaseClient.auth.getSession();
+  if (data?.session?.user?.email === ADMIN_EMAIL) {
+    showAdmin();
+  } else if (data?.session?.user) {
+    await supabaseClient.auth.signOut();
+  }
+});
+
+async function login(){
+  const email = document.getElementById("email").value.trim();
+  const password = document.getElementById("password").value;
+  const btn = document.getElementById("loginBtn");
+  const msg = document.getElementById("loginMessage");
+  if(!email || !password){ msg.textContent="Please enter email and password."; msg.style.color="#d94352"; return; }
+  btn.disabled=true; btn.textContent="Logging in...";
+  try{
+    const {data,error}=await supabaseClient.auth.signInWithPassword({email,password});
+    if(error) throw error;
+    if(!data.user || data.user.email!==ADMIN_EMAIL){
+      await supabaseClient.auth.signOut();
+      throw new Error("You are not authorized to access this admin panel.");
+    }
+    showAdmin();
+  }catch(error){
+    msg.textContent=error.message || "Login failed.";
+    msg.style.color="#d94352";
+  }finally{
+    btn.disabled=false; btn.textContent="Login";
+  }
+}
+
+function showAdmin(){
+  document.getElementById("loginPage").classList.add("hidden");
+  document.getElementById("adminPage").classList.remove("hidden");
+  loadTools();
+}
+
+async function logout(){
+  await supabaseClient.auth.signOut();
+  location.reload();
+}
+
+async function loadTools(){
+  const list=document.getElementById("toolsList");
+  list.innerHTML='<div class="loading">Loading your tools...</div>';
+  try{
+    const {data,error}=await supabaseClient.from("tools").select("*").order("sort_order",{ascending:true,nullsFirst:false}).order("id",{ascending:true});
+    if(error) throw error;
+    currentTools=data||[];
+    updateStats();
+    renderTools();
+  }catch(error){
+    list.innerHTML='<div class="empty">Error loading tools: '+escapeHtml(error.message||"Unknown error")+'</div>';
+  }
+}
+
+function updateStats(){
+  document.getElementById("totalCount").textContent=currentTools.length;
+  document.getElementById("visibleCount").textContent=currentTools.filter(t=>t.active!==false).length;
+  document.getElementById("hiddenCount").textContent=currentTools.filter(t=>t.active===false).length;
+  document.getElementById("featuredCount").textContent=currentTools.filter(t=>t.featured===true).length;
+}
+
+function renderTools(){
+  const q=(document.getElementById("adminSearch").value||"").trim().toLowerCase();
+  const filtered=currentTools.filter(tool=>{
+    const matchesSearch=!q || [tool.name,tool.description,tool.category].filter(Boolean).join(" ").toLowerCase().includes(q);
+    const normalizedCategory=normalizeCategory(tool.category);
+    const matchesFilter=
+      activeFilter==="all" ||
+      activeFilter===normalizedCategory ||
+      (activeFilter==="visible" && tool.active!==false) ||
+      (activeFilter==="hidden" && tool.active===false) ||
+      (activeFilter==="featured" && tool.featured===true);
+    return matchesSearch && matchesFilter;
+  });
+  document.getElementById("resultCount").textContent=filtered.length+" tool"+(filtered.length===1?"":"s");
+  const list=document.getElementById("toolsList");
+  if(!filtered.length){
+    list.innerHTML='<div class="empty">No tools found here.</div>';
+    return;
+  }
+  list.innerHTML=filtered.map(tool=>{
+    const position=currentTools.findIndex(t=>String(t.id)===String(tool.id))+1;
+    const visible=tool.active!==false;
+    const category=normalizeCategory(tool.category);
+    return `<article class="tool-card">
+      <div class="tool-top">
+        <span class="position-badge">Position ${position}</span>
+        <button type="button" class="more-btn" data-manage-id="${encodeURIComponent(String(tool.id))}" aria-label="Manage ${escapeHtml(tool.name||"tool")}">•••</button>
+      </div>
+      <h3>${escapeHtml(tool.icon||"🛠️")} ${escapeHtml(tool.name||"Unnamed Tool")}</h3>
+      <p>${escapeHtml(tool.description||"No description yet.")}</p>
+      <div class="meta-row">
+        <span class="meta">${escapeHtml(category)}</span>
+        <span class="meta ${visible?"":"hidden-meta"}">${visible?"Visible":"Hidden"}</span>
+        ${tool.featured?'<span class="meta featured">⭐ Featured</span>':""}
+      </div>
+      <div class="manage-hint">Tap ••• to edit, move or manage</div>
+    </article>`;
+  }).join("");
+}
+
+document.querySelectorAll("#filterRow .chip").forEach(btn=>{
+  btn.addEventListener("click",()=>{
+    document.querySelectorAll("#filterRow .chip").forEach(b=>b.classList.remove("active"));
+    btn.classList.add("active");
+    activeFilter=btn.dataset.filter;
+    renderTools();
+  });
+});
+
+// Robust event delegation for the ••• menu. This avoids inline onclick parsing issues on mobile browsers.
+document.getElementById("toolsList").addEventListener("click",(event)=>{
+  const button=event.target.closest(".more-btn[data-manage-id]");
+  if(!button) return;
+  event.preventDefault();
+  event.stopPropagation();
+  const id=decodeURIComponent(button.dataset.manageId||"");
+  if(id) openManage(id);
+});
+
+function getManagedTool(){
+  return currentTools.find(t=>String(t.id)===String(managedToolId));
+}
+
+window.openManage = function openManage(id){
+  managedToolId=id;
+  const tool=getManagedTool();
+  if(!tool) return;
+  const position=currentTools.findIndex(t=>String(t.id)===String(tool.id))+1;
+  document.getElementById("manageToolName").textContent=tool.name||"Manage Tool";
+  document.getElementById("manageToolInfo").textContent="Position "+position+" • "+(tool.active!==false?"Visible":"Hidden")+(tool.featured?" • Featured":"");
+  document.getElementById("visibilityActionText").textContent=tool.active!==false?"Hide Tool":"Show Tool";
+  document.getElementById("featuredActionText").textContent=tool.featured?"Unfeature Tool":"Feature Tool";
+  showSheet("manageSheet");
+}
+
+function showSheet(id){
+  document.getElementById("overlay").classList.add("show");
+  document.getElementById(id).classList.add("show");
+}
+function closeAllSheets(){
+  document.getElementById("overlay").classList.remove("show");
+  document.querySelectorAll(".sheet").forEach(s=>s.classList.remove("show"));
+}
+
+function openAddForm(){
+  cancelEdit(false);
+  document.getElementById("formBox").classList.remove("hidden");
+  document.getElementById("formTitle").textContent="Add New Tool";
+  document.getElementById("saveBtn").textContent="Add Tool";
+  document.getElementById("toolName").focus();
+  document.getElementById("formBox").scrollIntoView({behavior:"smooth",block:"start"});
+}
+
+function startEditFromManage(){
+  const tool=getManagedTool();
+  if(!tool) return;
+  closeAllSheets();
+  document.getElementById("formBox").classList.remove("hidden");
+  document.getElementById("editId").value=tool.id;
+  document.getElementById("toolName").value=tool.name||"";
+  document.getElementById("toolDescription").value=tool.description||"";
+  document.getElementById("toolIcon").value=tool.icon||"";
+  document.getElementById("toolCategory").value=normalizeCategory(tool.category);
+  document.getElementById("formTitle").textContent="Edit Tool";
+  document.getElementById("saveBtn").textContent="Update Tool";
+  document.getElementById("formBox").scrollIntoView({behavior:"smooth",block:"start"});
+}
+
+function cancelEdit(hide=true){
+  document.getElementById("editId").value="";
+  document.getElementById("toolName").value="";
+  document.getElementById("toolDescription").value="";
+  document.getElementById("toolIcon").value="";
+  document.getElementById("toolCategory").value="PDF";
+  document.getElementById("formTitle").textContent="Add New Tool";
+  document.getElementById("saveBtn").textContent="Add Tool";
+  if(hide) document.getElementById("formBox").classList.add("hidden");
+}
+
+async function saveTool(){
+  const editId=document.getElementById("editId").value;
+  const name=document.getElementById("toolName").value.trim();
+  const description=document.getElementById("toolDescription").value.trim();
+  const category=document.getElementById("toolCategory").value;
+  const icon=document.getElementById("toolIcon").value.trim();
+  const btn=document.getElementById("saveBtn");
+  if(!name){ showToast("Please enter a tool name."); return; }
+  btn.disabled=true;
+  try{
+    if(editId){
+      const {error}=await supabaseClient.from("tools").update({name,description,category,icon}).eq("id",editId);
+      if(error) throw error;
+      showToast("Tool updated successfully.");
+    }else{
+      const {error}=await supabaseClient.from("tools").insert([{name,description,category,icon,sort_order:currentTools.length+1,active:true,featured:false}]);
+      if(error) throw error;
+      showToast("New tool added successfully.");
+    }
+    cancelEdit();
+    await loadTools();
+  }catch(error){
+    showToast(error.message||"Something went wrong.");
+  }finally{
+    btn.disabled=false;
+  }
+}
+
+async function syncMissingTools(){
+  // Full website catalog. Supabase is the single source of truth after this sync.
+  // Existing rows are never duplicated; only missing names are inserted.
+  const catalog=[{"name":"PDF Signature Validator","description":"Verify and check digital signatures in PDF files.","category":"PDF","icon":"🔏"},{"name":"Merge PDF","description":"Combine multiple PDF files into one.","category":"PDF","icon":"🔗"},{"name":"Split PDF","description":"Split every PDF page into separate files.","category":"PDF","icon":"✂️"},{"name":"Delete Pages","description":"Remove unwanted PDF pages.","category":"PDF","icon":"🗑️"},{"name":"Image to PDF","description":"Convert images into one PDF.","category":"PDF","icon":"🖼️"},{"name":"PDF to Image","description":"Convert PDF pages into PNG or JPG.","category":"PDF","icon":"📄"},{"name":"Excel to PDF","description":"Convert Excel sheets into a PDF document.","category":"PDF","icon":"📊"},{"name":"PDF to Excel","description":"Extract PDF text into an Excel workbook.","category":"PDF","icon":"📈"},{"name":"HTML to PDF","description":"Convert an HTML file into a PDF document.","category":"PDF","icon":"🌐"},{"name":"Compress PDF","description":"Reduce PDF size for easier sharing.","category":"PDF","icon":"🗜️"},{"name":"PDF to Word","description":"Extract PDF text into a Word document.","category":"PDF","icon":"📝"},{"name":"Word to PDF","description":"Convert DOCX documents into PDF.","category":"PDF","icon":"📃"},{"name":"Edit PDF","description":"Add custom text to PDF pages.","category":"PDF","icon":"✏️"},{"name":"Watermark PDF","description":"Add text watermarks to your PDF.","category":"PDF","icon":"💧"},{"name":"OCR PDF","description":"Read text from scanned PDF pages.","category":"PDF","icon":"🔎"},{"name":"Crop PDF","description":"Trim page margins and page area.","category":"PDF","icon":"✂️"},{"name":"Rotate PDF","description":"Rotate PDF pages left, right or upside down.","category":"PDF","icon":"🔄"},{"name":"Extract Images","description":"Extract page images from a PDF.","category":"PDF","icon":"🖼️"},{"name":"Repair PDF","description":"Try to rebuild and save a damaged PDF.","category":"PDF","icon":"🛠️"},{"name":"Reorder PDF","description":"Drag and drop PDF pages into a new order.","category":"PDF","icon":"📑"},{"name":"PDF to Text","description":"Extract all readable text from a PDF.","category":"PDF","icon":"📄"},{"name":"Professional Scan to PDF","description":"Scan documents with camera, enhancement and multi-page PDF export.","category":"PDF","icon":"📷"},{"name":"Extract Pages","description":"Save selected PDF pages as a new PDF.","category":"PDF","icon":"🗂️"},{"name":"Resize PDF","description":"Resize PDF pages to A4, A5, Letter or Legal.","category":"PDF","icon":"📐"},{"name":"PDF Metadata","description":"Edit title, author, subject and keywords.","category":"PDF","icon":"📋"},{"name":"Remove Blank Pages","description":"Detect and remove mostly blank pages.","category":"PDF","icon":"🧹"},{"name":"Search PDF Text","description":"Find words and see matching page numbers.","category":"PDF","icon":"🔍"},{"name":"Bates Numbering","description":"Add professional sequential document numbers.","category":"PDF","icon":"🔢"},{"name":"Bookmarks & TOC","description":"Add a clickable table-of-contents page.","category":"PDF","icon":"📖"},{"name":"Print PDF","description":"Open your PDF and print it easily.","category":"PDF","icon":"🖨️"},{"name":"PDF Viewer","description":"View pages with zoom and full screen.","category":"PDF","icon":"👁️"},{"name":"PDF Info","description":"See pages, file size, dimensions and metadata.","category":"PDF","icon":"📊"},{"name":"Lock PDF","description":"Protect a PDF with a password.","category":"PDF","icon":"🔒"},{"name":"Unlock PDF","description":"Remove a password when you know it.","category":"PDF","icon":"🔓"},{"name":"Add Text to PDF","description":"Add custom text to a PDF.","category":"PDF","icon":"📝"},{"name":"Draw on PDF","description":"Draw and annotate PDF pages.","category":"PDF","icon":"🖍️"},{"name":"Combine PDF & Images","description":"Mix PDFs and images.","category":"PDF","icon":"📚"},{"name":"Image Compressor","description":"Reduce image size with quality control.","category":"Image","icon":"🗜️"},{"name":"Image Resizer","description":"Resize by pixels or percentage.","category":"Image","icon":"📐"},{"name":"Crop Image","description":"Crop with professional presets.","category":"Image","icon":"✂️"},{"name":"Rotate & Flip","description":"Rotate and mirror images.","category":"Image","icon":"🔄"},{"name":"Image Converter","description":"Convert JPG, PNG and WebP.","category":"Image","icon":"🔁"},{"name":"Watermark Image","description":"Add custom text watermarks.","category":"Image","icon":"💧"},{"name":"Image Metadata","description":"View file details and image data.","category":"Image","icon":"🏷️"},{"name":"Image to JPG","description":"Export images as high-quality JPG.","category":"Image","icon":"🖼️"},{"name":"Image to PNG","description":"Export images as lossless PNG.","category":"Image","icon":"🧊"},{"name":"Image to WebP","description":"Create smaller modern WebP files.","category":"Image","icon":"⚡"},{"name":"QR Code Generator","description":"Create downloadable QR codes.","category":"Useful","icon":"🔳"},{"name":"QR Code Scanner","description":"Scan QR codes from an image.","category":"Useful","icon":"📷"},{"name":"Barcode Generator","description":"Generate professional barcodes.","category":"Useful","icon":"▥"},{"name":"Barcode Scanner","description":"Read supported barcodes from images.","category":"Useful","icon":"📸"},{"name":"Password Generator","description":"Create strong secure passwords.","category":"Useful","icon":"🔐"},{"name":"Text Tools","description":"Change case and clean text.","category":"Useful","icon":"🔤"},{"name":"Word Counter","description":"Count words, characters and lines.","category":"Useful","icon":"🔢"},{"name":"Calculator","description":"Quick calculations in your browser.","category":"Useful","icon":"🧮"},{"name":"UUID Generator","description":"Create unique IDs instantly.","category":"Useful","icon":"🆔"}];
+  const names=new Set(currentTools.map(t=>(t.name||"").trim().toLowerCase()));
+  const missing=catalog.filter(x=>!names.has(x.name.toLowerCase()));
+  if(!missing.length){showToast("All 56 website/admin tools are already in Supabase.");return;}
+  try{
+    const maxOrder=currentTools.reduce((m,t)=>Math.max(m,Number(t.sort_order)||0),0);
+    const rows=missing.map((x,i)=>({...x,sort_order:maxOrder+i+1,active:true,featured:false}));
+    const {error}=await supabaseClient.from("tools").insert(rows);
+    if(error)throw error;
+    showToast(`${rows.length} missing website tools added to Supabase.`);
+    await loadTools();
+  }catch(error){showToast(error.message||"Could not sync missing tools.");}
+}
+
+async function toggleManagedVisibility(){
+  const tool=getManagedTool();
+  if(!tool) return;
+  try{
+    const {error}=await supabaseClient.from("tools").update({active:tool.active===false}).eq("id",tool.id);
+    if(error) throw error;
+    closeAllSheets();
+    showToast(tool.active===false?"Tool is now visible.":"Tool hidden.");
+    await loadTools();
+  }catch(error){ showToast(error.message||"Could not update visibility."); }
+}
+
+async function toggleManagedFeatured(){
+  const tool=getManagedTool();
+  if(!tool) return;
+  try{
+    const {error}=await supabaseClient.from("tools").update({featured:!tool.featured}).eq("id",tool.id);
+    if(error) throw error;
+    closeAllSheets();
+    showToast(tool.featured?"Tool removed from featured.":"Tool featured successfully.");
+    await loadTools();
+  }catch(error){ showToast(error.message||"Could not update featured status."); }
+}
+
+function openMoveSheet(){
+  const tool=getManagedTool();
+  if(!tool) return;
+  closeAllSheets();
+  const currentPosition=currentTools.findIndex(t=>String(t.id)===String(tool.id))+1;
+  selectedMovePosition=currentPosition;
+  document.getElementById("moveToolName").textContent=tool.name||"Tool";
+  document.getElementById("currentPositionPill").textContent="Now: "+currentPosition;
+  buildPositionGrid();
+  updateMovePreview();
+  showSheet("moveSheet");
+}
+
+function buildPositionGrid(){
+  const grid=document.getElementById("positionGrid");
+  grid.innerHTML=currentTools.map((tool,index)=>{
+    const pos=index+1;
+    return `<button class="position-btn ${pos===selectedMovePosition?"selected":""}" onclick="selectMovePosition(${pos})">${pos}</button>`;
+  }).join("");
+}
+
+function selectMovePosition(position){
+  selectedMovePosition=Math.max(1,Math.min(position,currentTools.length));
+  buildPositionGrid();
+  updateMovePreview();
+}
+
+function updateMovePreview(){
+  const tool=getManagedTool();
+  if(!tool) return;
+  const oldPos=currentTools.findIndex(t=>String(t.id)===String(tool.id))+1;
+  document.getElementById("selectedPositionText").textContent="Position "+selectedMovePosition;
+  document.getElementById("movePreview").textContent=
+    oldPos===selectedMovePosition
+      ?"The tool is already at Position "+selectedMovePosition+"."
+      :(tool.name||"This tool")+" will move from Position "+oldPos+" to Position "+selectedMovePosition+".";
+}
+
+async function confirmMove(){
+  const tool=getManagedTool();
+  if(!tool || !selectedMovePosition) return;
+  const oldIndex=currentTools.findIndex(t=>String(t.id)===String(tool.id));
+  const newIndex=selectedMovePosition-1;
+  if(oldIndex===newIndex){ closeAllSheets(); showToast("The tool is already there."); return; }
+
+  const reordered=[...currentTools];
+  const [moved]=reordered.splice(oldIndex,1);
+  reordered.splice(newIndex,0,moved);
+  const btn=document.getElementById("confirmMoveBtn");
+  btn.disabled=true; btn.textContent="Moving...";
+
+  try{
+    for(let i=0;i<reordered.length;i++){
+      const {error}=await supabaseClient.from("tools").update({sort_order:i+1}).eq("id",reordered[i].id);
+      if(error) throw error;
+    }
+    closeAllSheets();
+    showToast((tool.name||"Tool")+" moved to Position "+selectedMovePosition+".");
+    await loadTools();
+  }catch(error){
+    showToast(error.message||"Failed to move the tool.");
+    await loadTools();
+  }finally{
+    btn.disabled=false; btn.textContent="Move Here";
+  }
+}
+
+function openDeleteSheet(){
+  const tool=getManagedTool();
+  if(!tool) return;
+  closeAllSheets();
+  document.getElementById("deleteToolName").textContent='Delete "'+(tool.name||"this tool")+'"?';
+  showSheet("deleteSheet");
+}
+
+async function confirmDelete(){
+  const tool=getManagedTool();
+  if(!tool) return;
+  const btn=document.getElementById("confirmDeleteBtn");
+  btn.disabled=true; btn.textContent="Deleting...";
+  try{
+    const {error}=await supabaseClient.from("tools").delete().eq("id",tool.id);
+    if(error) throw error;
+    const remaining=currentTools.filter(t=>String(t.id)!==String(tool.id));
+    for(let i=0;i<remaining.length;i++){
+      const {error:updateError}=await supabaseClient.from("tools").update({sort_order:i+1}).eq("id",remaining[i].id);
+      if(updateError) throw updateError;
+    }
+    closeAllSheets();
+    showToast("Tool deleted and positions updated.");
+    await loadTools();
+  }catch(error){
+    showToast(error.message||"Failed to delete tool.");
+  }finally{
+    btn.disabled=false; btn.textContent="Delete Tool";
+  }
+}
+
+function showToast(message){
+  const toast=document.getElementById("toast");
+  toast.textContent=message;
+  toast.classList.add("show");
+  clearTimeout(toastTimer);
+  toastTimer=setTimeout(()=>toast.classList.remove("show"),2600);
+}
+
+function escapeHtml(text){
+  const div=document.createElement("div");
+  div.textContent=String(text);
+  return div.innerHTML;
+}
+</script>
+</body>
+</html>

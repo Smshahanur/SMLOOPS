@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Contact Us - SMLOOP</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #f5f7fb;
+      color: #1f2937;
+      line-height: 1.7;
+    }
+
+    header {
+      background: #111827;
+      color: white;
+      padding: 25px;
+      text-align: center;
+    }
+
+    .container {
+      max-width: 800px;
+      margin: 40px auto;
+      background: white;
+      padding: 40px;
+      border-radius: 16px;
+      box-shadow: 0 5px 25px rgba(0,0,0,0.08);
+    }
+
+    h1, h2 {
+      color: #111827;
+    }
+
+    .intro {
+      color: #6b7280;
+      margin-bottom: 30px;
+    }
+
+    .contact-card {
+      background: #f8fafc;
+      padding: 25px;
+      border-radius: 12px;
+      margin-top: 25px;
+      border: 1px solid #e5e7eb;
+    }
+
+    label {
+      display: block;
+      font-weight: bold;
+      margin-top: 18px;
+    }
+
+    input,
+    textarea {
+      width: 100%;
+      padding: 12px;
+      margin-top: 7px;
+      border: 1px solid #d1d5db;
+      border-radius: 8px;
+      font-size: 16px;
+      font-family: Arial, sans-serif;
+    }
+
+    textarea {
+      min-height: 150px;
+      resize: vertical;
+    }
+
+    button {
+      width: 100%;
+      margin-top: 20px;
+      padding: 13px;
+      border: none;
+      border-radius: 8px;
+      background: #2563eb;
+      color: white;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: #1d4ed8;
+    }
+
+    .email {
+      margin-top: 25px;
+      padding: 18px;
+      background: #eff6ff;
+      border-radius: 10px;
+    }
+
+    a {
+      color: #2563eb;
+      text-decoration: none;
+    }
+
+    .back {
+      display: inline-block;
+      margin-top: 25px;
+    }
+
+    footer {
+      text-align: center;
+      padding: 30px;
+      color: #6b7280;
+    }
+  </style>
+</head>
+
+<body>
+
+<header>
+  <h1>Contact SMLOOP</h1>
+</header>
+
+<div class="container">
+
+  <h2>Get in Touch</h2>
+
+  <p class="intro">
+    Have a question, suggestion, feedback, or need help with a SMLOOP tool?
+    Send us a message and we will do our best to help.
+  </p>
+
+  <div class="contact-card">
+
+    <form id="contactForm">
+
+      <label for="name">Your Name</label>
+      <input type="text" id="name" name="name" required>
+
+      <label for="email">Your Email</label>
+      <input type="email" id="email" name="email" required>
+
+      <label for="message">Your Message</label>
+      <textarea id="message" name="message" required></textarea>
+
+      <button type="submit">Send Message</button>
+
+    </form>
+
+  </div>
+
+  <div class="email">
+    <strong>Email:</strong>
+    <p>
+      <a href="mailto:shahanurmollah1@gmail.com">
+        shahanurmollah1@gmail.com
+      </a>
+    </p>
+  </div>
+
+  <a class="back" href="index.html">← Back to SMLOOP</a>
+
+</div>
+
+<footer>
+  © 2026 SMLOOP. All rights reserved.
+</footer>
+
+<script>
+  document.getElementById("contactForm").addEventListener("submit", function(e) {
+    e.preventDefault();
+
+    const name = document.getElementById("name").value;
+    const email = document.getElementById("email").value;
+    const message = document.getElementById("message").value;
+
+    const subject = encodeURIComponent("SMLOOP Contact: " + name);
+
+    const body = encodeURIComponent(
+      "Name: " + name +
+      "\nEmail: " + email +
+      "\n\nMessage:\n" + message
+    );
+
+    window.location.href =
+      "mailto:shahanurmollah1@gmail.com?subject=" +
+      subject +
+      "&body=" + body;
+  });
+</script>
+
+</body>
+</html>
