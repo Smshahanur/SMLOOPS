@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OCR PDF Online – Extract Text from Scanned PDFs | SMLOOPS</title>
+  <meta name="description" content="Extract editable and searchable text from scanned, image-based PDF files directly in your browser. 100% private client-side OCR using Tesseract WebAssembly with zero server uploads.">
+  <link rel="canonical" href="https://smloops.vercel.app/tool-ocr-pdf.html">
+  <meta property="og:type" content="article">
+  <meta property="og:title" content="OCR PDF Online – Extract Text from Scanned PDFs | SMLOOPS">
+  <meta property="og:description" content="Convert scanned PDF documents into searchable, editable text directly in your web browser with complete client-side privacy.">
+  <meta property="og:url" content="https://smloops.vercel.app/tool-ocr-pdf.html">
+  <meta name="twitter:card" content="summary_large_image">
+
+  <!-- Schema.org FAQPage & HowTo Structured Data -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "HowTo",
+        "name": "How to Run OCR on a Scanned PDF in Your Browser",
+        "description": "Step-by-step tutorial to extract searchable text from scanned PDF pages using SMLOOPS in-browser OCR.",
+        "step": [
+          {
+            "@type": "HowToStep",
+            "name": "Select Scanned PDF",
+            "text": "Open the SMLOOPS OCR PDF tool and choose your scanned or image-based PDF document."
+          },
+          {
+            "@type": "HowToStep",
+            "name": "Start Neural Character Recognition",
+            "text": "Click Start OCR. The browser initializes a local WebAssembly Tesseract worker engine."
+          },
+          {
+            "@type": "HowToStep",
+            "name": "Process Page by Page",
+            "text": "Each scanned page is converted to an image raster and analyzed for character contours and typography."
+          },
+          {
+            "@type": "HowToStep",
+            "name": "Download Text File",
+            "text": "Save the extracted text file directly to your computer or phone."
+          }
+        ]
+      },
+      {
+        "@type": "FAQPage",
+        "mainEntity": [
+          {
+            "@type": "Question",
+            "name": "How does in-browser OCR protect my privacy?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Traditional OCR services upload your sensitive scanned documents to remote server farms. SMLOOPS runs the Tesseract neural OCR engine locally in browser WebAssembly. Your documents never leave your device."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Can OCR read handwritten notes?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Standard OCR models are optimized for printed, typed typography. Neat, block handwriting can often be recognized, but cursive or illegible writing may yield errors."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "What causes OCR recognition errors?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Low scanner resolution (below 150 DPI), heavy paper skew, severe coffee stains, folds, or low-contrast photocopies can reduce OCR recognition accuracy."
+            }
+          }
+        ]
+      }
+    ]
+  }
+  </script>
+
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #f5f6fc;
+      color: #1f2937;
+      line-height: 1.7;
+    }
+    header {
+      background: #fff;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 18px 6%;
+      box-shadow: 0 2px 12px rgba(0,0,0,.08);
+    }
+    .logo {
+      font-size: 26px;
+      font-weight: 800;
+      color: #0f766e;
+      text-decoration: none;
+      letter-spacing: 0.5px;
+    }
+    nav {
+      display: flex;
+      gap: 22px;
+      align-items: center;
+    }
+    nav a {
+      color: #475467;
+      text-decoration: none;
+      font-size: 15px;
+      font-weight: 600;
+      transition: color 0.2s;
+    }
+    nav a:hover {
+      color: #0f766e;
+    }
+    .wrap {
+      max-width: 960px;
+      margin: auto;
+      padding: 45px 20px 70px;
+    }
+    .hero {
+      background: linear-gradient(135deg, #f0fdfa, #ffffff);
+      border: 1px solid #ccfbf1;
+      border-radius: 24px;
+      padding: 42px 30px;
+      text-align: center;
+      box-shadow: 0 10px 30px rgba(15,118,110,0.06);
+    }
+    .icon {
+      font-size: 52px;
+      margin-bottom: 8px;
+    }
+    .kicker {
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: #0f766e;
+      font-size: 13px;
+      font-weight: 800;
+      margin: 6px 0;
+    }
+    .hero h1 {
+      font-size: 38px;
+      line-height: 1.2;
+      margin: 10px 0 16px;
+      color: #111827;
+    }
+    .hero p {
+      max-width: 740px;
+      margin: 0 auto;
+      color: #4b5563;
+      font-size: 18px;
+    }
+    .cta {
+      display: inline-block;
+      margin-top: 25px;
+      background: #0f766e;
+      color: #fff;
+      text-decoration: none;
+      font-weight: 700;
+      padding: 15px 30px;
+      border-radius: 12px;
+      font-size: 16px;
+      transition: transform 0.2s, background 0.2s;
+    }
+    .cta:hover {
+      background: #115e59;
+      transform: translateY(-2px);
+    }
+    .section-title {
+      font-size: 26px;
+      color: #111827;
+      margin: 45px 0 18px;
+      border-bottom: 2px solid #e5e7eb;
+      padding-bottom: 10px;
+    }
+    .guide-card {
+      background: #fff;
+      border: 1px solid #e5e7eb;
+      border-radius: 16px;
+      padding: 26px 28px;
+      margin-bottom: 22px;
+      box-shadow: 0 4px 16px rgba(0,0,0,.04);
+    }
+    .guide-card h2, .guide-card h3 {
+      margin-top: 0;
+      color: #0f766e;
+      font-size: 20px;
+    }
+    .guide-card p {
+      color: #4b5563;
+      margin-bottom: 14px;
+      line-height: 1.7;
+    }
+    .guide-card p:last-child {
+      margin-bottom: 0;
+    }
+    .step-list {
+      counter-reset: step-counter;
+      list-style: none;
+      padding: 0;
+      margin: 20px 0 0;
+    }
+    .step-item {
+      counter-increment: step-counter;
+      position: relative;
+      padding-left: 55px;
+      margin-bottom: 24px;
+    }
+    .step-item::before {
+      content: counter(step-counter);
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 38px;
+      height: 38px;
+      background: #0f766e;
+      color: #fff;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 16px;
+    }
+    .step-item h4 {
+      margin: 0 0 6px;
+      font-size: 18px;
+      color: #111827;
+    }
+    .example-box {
+      background: #f8fafc;
+      border: 1px dashed #cbd5e1;
+      border-radius: 14px;
+      padding: 22px;
+      margin: 20px 0;
+    }
+    .example-box h4 {
+      margin: 0 0 8px;
+      color: #1e293b;
+      font-size: 17px;
+    }
+    .limitations-list {
+      padding-left: 20px;
+      margin: 12px 0 0;
+    }
+    .limitations-list li {
+      margin-bottom: 10px;
+      color: #4b5563;
+    }
+    .faq-item {
+      margin-bottom: 20px;
+    }
+    .faq-item h4 {
+      margin: 0 0 6px;
+      font-size: 17px;
+      color: #111827;
+    }
+    .faq-item p {
+      margin: 0;
+      color: #4b5563;
+    }
+    .back {
+      display: inline-block;
+      margin-top: 30px;
+      color: #0f766e;
+      font-weight: 700;
+      text-decoration: none;
+    }
+    .back:hover {
+      text-decoration: underline;
+    }
+    footer {
+      text-align: center;
+      padding: 35px 20px;
+      background: #1f2937;
+      color: #9ca3af;
+      margin-top: 60px;
+      font-size: 14px;
+    }
+    .footer-links {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 18px;
+      margin-bottom: 15px;
+    }
+    .footer-links a {
+      color: #e5e7eb;
+      text-decoration: none;
+    }
+    .footer-links a:hover {
+      text-decoration: underline;
+    }
+    @media(max-width: 650px){
+      header { padding: 15px 18px; }
+      nav { gap: 12px; }
+      .hero { padding: 30px 20px; }
+      .hero h1 { font-size: 28px; }
+      .hero p { font-size: 16px; }
+      .wrap { padding-top: 25px; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <a class="logo" href="index.html">SMLOOPS</a>
+  <nav>
+    <a href="index.html">Home</a>
+    <a href="index.html#tools">PDF Tools</a>
+    <a href="index.html#learn">Guides</a>
+    <a href="about.html">About</a>
+  </nav>
+</header>
+
+<main class="wrap">
+  <section class="hero">
+    <div class="icon">🔎</div>
+    <div class="kicker">In-Depth Tool Tutorial</div>
+    <h1>OCR PDF Online (Client-Side)</h1>
+    <p>
+      Extract selectable, searchable, and editable text from scanned or image-based PDF documents. 
+      Powered by Tesseract WebAssembly running directly inside your browser. Zero server uploads.
+    </p>
+    <a class="cta" href="index.html?tool=ocr#tools">Launch OCR PDF Tool &rarr;</a>
+  </section>
+
+  <h2 class="section-title">What is OCR &amp; How Does SMLOOPS Process It?</h2>
+  <article class="guide-card">
+    <p>
+      When paper documents are scanned, traditional scanners generate a photographic snapshot of the page 
+      (known as a raster bitmap) rather than true digital typography. The result is a PDF that looks like text to a human, 
+      but to a computer is merely millions of coloured pixel dots. You cannot highlight, copy, search, or paste from it.
+    </p>
+    <p>
+      <strong>Optical Character Recognition (OCR)</strong> bridges this divide by examining pixel patterns and reconstructing 
+      digital characters.
+    </p>
+    <p>
+      SMLOOPS provides complete client-side privacy by executing <code>Tesseract.js</code> in browser Web Workers:
+    </p>
+    <ul>
+      <li><strong>Page Image Extraction:</strong> Each PDF page is rasterized at high resolution (1.5x scale) onto an HTML5 canvas in memory.</li>
+      <li><strong>Binarization &amp; Contrast Analysis:</strong> The OCR worker analyzes edge contours, baseline alignments, and character geometry.</li>
+      <li><strong>Neural Pattern Matching:</strong> Tesseract matches pixel arrangements against trained language typography datasets.</li>
+      <li><strong>Formatted Text Generation:</strong> The recognized characters, line breaks, and page divisions are assembled into an easily readable text document.</li>
+    </ul>
+    <p>
+      Because processing runs inside local Web Workers on your device, sensitive financial records, legal transcripts, 
+      or personal letters are never exposed to remote third-party cloud servers.
+    </p>
+  </article>
+
+  <h2 class="section-title">Who Needs This Tool?</h2>
+  <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(240px, 1fr));gap:18px;margin-bottom:25px;">
+    <div class="guide-card" style="margin-bottom:0;">
+      <h3>⚖️ Legal Assistants &amp; Paralegals</h3>
+      <p>Convert scanned discovery transcripts, witness declarations, and court rulings into searchable text for case briefs and citation searches.</p>
+    </div>
+    <div class="guide-card" style="margin-bottom:0;">
+      <h3>📚 Historians &amp; Researchers</h3>
+      <p>Transcribe vintage print publications, archived news clippings, and university papers into editable research documents.</p>
+    </div>
+    <div class="guide-card" style="margin-bottom:0;">
+      <h3>🧾 Bookkeepers &amp; Data Entry Teams</h3>
+      <p>Extract line-item details, account numbers, and invoice totals from paper bills into spreadsheets without manual re-typing.</p>
+    </div>
+    <div class="guide-card" style="margin-bottom:0;">
+      <h3>🎓 Students &amp; Educators</h3>
+      <p>Turn photocopy chapter printouts and teacher handouts into selectable digital notes for study guides and flashcards.</p>
+    </div>
+  </div>
+
+  <h2 class="section-title">Step-by-Step OCR Tutorial</h2>
+  <article class="guide-card">
+    <ol class="step-list">
+      <li class="step-item">
+        <h4>Upload Your Scanned PDF</h4>
+        <p>Open the SMLOOPS OCR PDF tool and select the scanned document you want to transcribe.</p>
+      </li>
+      <li class="step-item">
+        <h4>Initialize Client-Side Worker</h4>
+        <p>Click "Start OCR". Your browser loads the lightweight Tesseract WebAssembly runtime in a background worker thread.</p>
+      </li>
+      <li class="step-item">
+        <h4>Watch Live Page Recognition</h4>
+        <p>A live status indicator tracks character recognition as each page is converted and transcribed.</p>
+      </li>
+      <li class="step-item">
+        <h4>Download Extracted Text</h4>
+        <p>The extracted text is compiled and downloaded as a clean <code>ocr-text.txt</code> file organized with distinct page headers.</p>
+      </li>
+    </ol>
+  </article>
+
+  <h2 class="section-title">Practical Real-World Example</h2>
+  <article class="guide-card">
+    <div class="example-box">
+      <h4>Scenario: Transcribing a 1998 Commercial Lease Agreement</h4>
+      <p>
+        A property manager has a physical 4-page lease agreement signed in 1998 that was scanned as flat images. 
+        The manager urgently needs to find the exact clause governing tenant property alterations:
+      </p>
+      <ul style="padding-left:20px;color:#334155;margin:8px 0;">
+        <li>Input: 4-page scanned image PDF (unsearchable in Adobe Reader or browser search)</li>
+        <li>Action: Processed through SMLOOPS OCR PDF in approximately 6 seconds</li>
+        <li>Result: Clean text export containing the full lease text, allowing instant <code>Ctrl+F</code> keyword search for "alterations" and immediate copy-paste into an email.</li>
+      </ul>
+    </div>
+  </article>
+
+  <h2 class="section-title">Factors Affecting OCR Accuracy</h2>
+  <article class="guide-card">
+    <h3>Tips to Maximize Text Quality:</h3>
+    <ul class="limitations-list">
+      <li><strong>Scan Resolution:</strong> Scans at 300 DPI produce substantially higher accuracy than low-res 72 DPI scans.</li>
+      <li><strong>Document Alignment:</strong> Severe page skew (crooked scanning) can confuse line baselines. Straight scans provide cleaner word separations.</li>
+      <li><strong>Contrast &amp; Background:</strong> High black-on-white contrast yields near-perfect accuracy. Faded receipts, dark yellow paper, or stained invoices may require visual proofreading.</li>
+      <li><strong>Handwriting vs Print:</strong> The engine is trained on printed typography. While neat block handwriting may transcribe decently, cursive script is not reliably supported.</li>
+    </ul>
+  </article>
+
+  <h2 class="section-title">Frequently Asked Questions</h2>
+  <article class="guide-card">
+    <div class="faq-item">
+      <h4>Is my document uploaded anywhere during OCR?</h4>
+      <p>No! The entire Tesseract OCR neural model runs locally in your web browser via WebAssembly. Your files never touch external servers.</p>
+    </div>
+    <div class="faq-item">
+      <h4>How many pages can I OCR at once?</h4>
+      <p>There are no artificial limits. Processing time scales with page count and device CPU speed (typically 1–2 seconds per page).</p>
+    </div>
+    <div class="faq-item">
+      <h4>Can I copy the text directly into Word or Google Docs?</h4>
+      <p>Yes. The resulting <code>.txt</code> file can be opened in any text editor, copied to your clipboard, and pasted directly into Word, Docs, or Excel.</p>
+    </div>
+  </article>
+
+  <a class="back" href="index.html#learn">&larr; Back to all SMLOOPS Guides &amp; Tools</a>
+</main>
+
+<footer>
+  <div class="footer-links">
+    <a href="index.html">Home</a>
+    <a href="about.html">About Us</a>
+    <a href="contact.html">Contact Us</a>
+    <a href="privacy.html">Privacy Policy</a>
+    <a href="terms.html">Terms of Service</a>
+    <a href="disclaimer.html">Disclaimer</a>
+  </div>
+  <div>&copy; 2026 SMLOOPS. All Rights Reserved. &bull; Designed &amp; Developed By Shahanur Mollah.</div>
+</footer>
+
+</body>
+</html>

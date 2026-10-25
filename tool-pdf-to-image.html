@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PDF to Image Online – Convert PDF Pages to PNG &amp; JPG | SMLOOPS</title>
+  <meta name="description" content="Convert PDF document pages into high-resolution PNG or JPG images directly in your browser. 100% private, free client-side rasterization with zero server uploads.">
+  <link rel="canonical" href="https://smloops.vercel.app/tool-pdf-to-image.html">
+  <meta property="og:type" content="article">
+  <meta property="og:title" content="PDF to Image Online – Convert PDF Pages to PNG &amp; JPG | SMLOOPS">
+  <meta property="og:description" content="Rasterize and extract crisp image files from any PDF page using client-side HTML5 canvas rendering in your browser.">
+  <meta property="og:url" content="https://smloops.vercel.app/tool-pdf-to-image.html">
+  <meta name="twitter:card" content="summary_large_image">
+
+  <!-- Schema.org FAQPage & HowTo Structured Data -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "HowTo",
+        "name": "How to Convert PDF Pages into PNG or JPG Images",
+        "description": "Step-by-step tutorial to render and extract high-resolution image files from PDF pages using SMLOOPS.",
+        "step": [
+          {
+            "@type": "HowToStep",
+            "name": "Select Your PDF",
+            "text": "Open the SMLOOPS PDF to Image tool and choose the PDF file from your computer or phone."
+          },
+          {
+            "@type": "HowToStep",
+            "name": "Choose Format and Quality",
+            "text": "Select whether you prefer lossless PNG (ideal for crisp text and line art) or compressed JPG (ideal for photo-heavy pages)."
+          },
+          {
+            "@type": "HowToStep",
+            "name": "Rasterize In-Browser",
+            "text": "Click Convert PDF to Images. The Mozilla PDF.js engine renders each page onto an HTML5 canvas in memory."
+          },
+          {
+            "@type": "HowToStep",
+            "name": "Download Image Files",
+            "text": "Save the resulting image files directly to your device storage."
+          }
+        ]
+      },
+      {
+        "@type": "FAQPage",
+        "mainEntity": [
+          {
+            "@type": "Question",
+            "name": "What is the difference between PNG and JPG for PDF export?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "PNG uses lossless compression, making it ideal for diagrams, charts, and sharp text. JPG uses lossy compression, resulting in smaller file sizes for documents rich with photographs."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Can I convert just one specific page instead of the entire document?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Yes. SMLOOPS lets you specify individual target pages or convert all pages in sequence."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Are my PDF files uploaded to an external server?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "No. The entire rendering process takes place on your local CPU and GPU via HTML5 canvas technology inside your browser."
+            }
+          }
+        ]
+      }
+    ]
+  }
+  </script>
+
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #f5f6fc;
+      color: #1f2937;
+      line-height: 1.7;
+    }
+    header {
+      background: #fff;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 18px 6%;
+      box-shadow: 0 2px 12px rgba(0,0,0,.08);
+    }
+    .logo {
+      font-size: 26px;
+      font-weight: 800;
+      color: #0f766e;
+      text-decoration: none;
+      letter-spacing: 0.5px;
+    }
+    nav {
+      display: flex;
+      gap: 22px;
+      align-items: center;
+    }
+    nav a {
+      color: #475467;
+      text-decoration: none;
+      font-size: 15px;
+      font-weight: 600;
+      transition: color 0.2s;
+    }
+    nav a:hover {
+      color: #0f766e;
+    }
+    .wrap {
+      max-width: 960px;
+      margin: auto;
+      padding: 45px 20px 70px;
+    }
+    .hero {
+      background: linear-gradient(135deg, #f0fdfa, #ffffff);
+      border: 1px solid #ccfbf1;
+      border-radius: 24px;
+      padding: 42px 30px;
+      text-align: center;
+      box-shadow: 0 10px 30px rgba(15,118,110,0.06);
+    }
+    .icon {
+      font-size: 52px;
+      margin-bottom: 8px;
+    }
+    .kicker {
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: #0f766e;
+      font-size: 13px;
+      font-weight: 800;
+      margin: 6px 0;
+    }
+    .hero h1 {
+      font-size: 38px;
+      line-height: 1.2;
+      margin: 10px 0 16px;
+      color: #111827;
+    }
+    .hero p {
+      max-width: 740px;
+      margin: 0 auto;
+      color: #4b5563;
+      font-size: 18px;
+    }
+    .cta {
+      display: inline-block;
+      margin-top: 25px;
+      background: #0f766e;
+      color: #fff;
+      text-decoration: none;
+      font-weight: 700;
+      padding: 15px 30px;
+      border-radius: 12px;
+      font-size: 16px;
+      transition: transform 0.2s, background 0.2s;
+    }
+    .cta:hover {
+      background: #115e59;
+      transform: translateY(-2px);
+    }
+    .section-title {
+      font-size: 26px;
+      color: #111827;
+      margin: 45px 0 18px;
+      border-bottom: 2px solid #e5e7eb;
+      padding-bottom: 10px;
+    }
+    .guide-card {
+      background: #fff;
+      border: 1px solid #e5e7eb;
+      border-radius: 16px;
+      padding: 26px 28px;
+      margin-bottom: 22px;
+      box-shadow: 0 4px 16px rgba(0,0,0,.04);
+    }
+    .guide-card h2, .guide-card h3 {
+      margin-top: 0;
+      color: #0f766e;
+      font-size: 20px;
+    }
+    .guide-card p {
+      color: #4b5563;
+      margin-bottom: 14px;
+      line-height: 1.7;
+    }
+    .guide-card p:last-child {
+      margin-bottom: 0;
+    }
+    .step-list {
+      counter-reset: step-counter;
+      list-style: none;
+      padding: 0;
+      margin: 20px 0 0;
+    }
+    .step-item {
+      counter-increment: step-counter;
+      position: relative;
+      padding-left: 55px;
+      margin-bottom: 24px;
+    }
+    .step-item::before {
+      content: counter(step-counter);
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 38px;
+      height: 38px;
+      background: #0f766e;
+      color: #fff;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 16px;
+    }
+    .step-item h4 {
+      margin: 0 0 6px;
+      font-size: 18px;
+      color: #111827;
+    }
+    .example-box {
+      background: #f8fafc;
+      border: 1px dashed #cbd5e1;
+      border-radius: 14px;
+      padding: 22px;
+      margin: 20px 0;
+    }
+    .example-box h4 {
+      margin: 0 0 8px;
+      color: #1e293b;
+      font-size: 17px;
+    }
+    .limitations-list {
+      padding-left: 20px;
+      margin: 12px 0 0;
+    }
+    .limitations-list li {
+      margin-bottom: 10px;
+      color: #4b5563;
+    }
+    .faq-item {
+      margin-bottom: 20px;
+    }
+    .faq-item h4 {
+      margin: 0 0 6px;
+      font-size: 17px;
+      color: #111827;
+    }
+    .faq-item p {
+      margin: 0;
+      color: #4b5563;
+    }
+    .back {
+      display: inline-block;
+      margin-top: 30px;
+      color: #0f766e;
+      font-weight: 700;
+      text-decoration: none;
+    }
+    .back:hover {
+      text-decoration: underline;
+    }
+    footer {
+      text-align: center;
+      padding: 35px 20px;
+      background: #1f2937;
+      color: #9ca3af;
+      margin-top: 60px;
+      font-size: 14px;
+    }
+    .footer-links {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 18px;
+      margin-bottom: 15px;
+    }
+    .footer-links a {
+      color: #e5e7eb;
+      text-decoration: none;
+    }
+    .footer-links a:hover {
+      text-decoration: underline;
+    }
+    @media(max-width: 650px){
+      header { padding: 15px 18px; }
+      nav { gap: 12px; }
+      .hero { padding: 30px 20px; }
+      .hero h1 { font-size: 28px; }
+      .hero p { font-size: 16px; }
+      .wrap { padding-top: 25px; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <a class="logo" href="index.html">SMLOOPS</a>
+  <nav>
+    <a href="index.html">Home</a>
+    <a href="index.html#tools">PDF Tools</a>
+    <a href="index.html#learn">Guides</a>
+    <a href="about.html">About</a>
+  </nav>
+</header>
+
+<main class="wrap">
+  <section class="hero">
+    <div class="icon">📄</div>
+    <div class="kicker">In-Depth Tool Tutorial</div>
+    <h1>PDF to Image Online (Client-Side)</h1>
+    <p>
+      Extract and convert PDF pages into high-resolution PNG or JPG graphics. Ideal for social media carousels, 
+      slide presentations, and web publishing with 100% private in-browser rendering.
+    </p>
+    <a class="cta" href="index.html?tool=pdftoimage#tools">Launch PDF to Image Tool &rarr;</a>
+  </section>
+
+  <h2 class="section-title">How PDF to Image Conversion Works</h2>
+  <article class="guide-card">
+    <p>
+      PDF documents are natively designed as vector-based page display formats. Converting a PDF page into an image 
+      requires <strong>rasterization</strong>—calculating the exact RGB pixel color value for every point on the page canvas 
+      at a designated resolution scale (such as 150 DPI or 300 DPI).
+    </p>
+    <p>
+      SMLOOPS utilizes Mozilla's production-grade <code>PDF.js</code> rendering engine directly inside your web browser:
+    </p>
+    <ul>
+      <li><strong>Viewport Calculation:</strong> The tool retrieves the precise millimeter dimensions and bounding box of each page.</li>
+      <li><strong>Hardware-Accelerated Canvas Rendering:</strong> Fonts, vector paths, illustrations, and color gradients are drawn directly onto an off-screen HTML5 canvas element using your device’s GPU acceleration.</li>
+      <li><strong>Blob Encoding:</strong> The canvas pixel buffer is exported to an optimized PNG (lossless) or JPEG (standard compression) binary blob.</li>
+      <li><strong>Immediate Download:</strong> The images are saved straight to your downloads directory without any external server processing.</li>
+    </ul>
+  </article>
+
+  <h2 class="section-title">Who Needs This Tool?</h2>
+  <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(240px, 1fr));gap:18px;margin-bottom:25px;">
+    <div class="guide-card" style="margin-bottom:0;">
+      <h3>📱 Content Creators &amp; Marketers</h3>
+      <p>Convert multi-page PDF research reports, guides, or whitepapers into sequential high-res PNG slides for LinkedIn carousels and Instagram posts.</p>
+    </div>
+    <div class="guide-card" style="margin-bottom:0;">
+      <h3>🎤 Speakers &amp; Presenters</h3>
+      <p>Insert individual pages from scientific journals, architectural blueprints, or financial audits directly into PowerPoint, Google Slides, or Keynote presentations.</p>
+    </div>
+    <div class="guide-card" style="margin-bottom:0;">
+      <h3>💻 Web Designers &amp; Developers</h3>
+      <p>Generate clean thumbnail image previews and teaser images for downloadable PDF eBooks, brochures, and catalogs on your website.</p>
+    </div>
+    <div class="guide-card" style="margin-bottom:0;">
+      <h3>📰 Journalists &amp; Researchers</h3>
+      <p>Embed public records, FOIA release pages, and historical document exhibits as static images in online news articles and blog posts.</p>
+    </div>
+  </div>
+
+  <h2 class="section-title">Step-by-Step Conversion Tutorial</h2>
+  <article class="guide-card">
+    <ol class="step-list">
+      <li class="step-item">
+        <h4>Upload Your PDF Document</h4>
+        <p>Open the SMLOOPS PDF to Image tool and choose the PDF file from your device.</p>
+      </li>
+      <li class="step-item">
+        <h4>Choose Image Format (PNG vs JPG)</h4>
+        <p>Select PNG if your document contains sharp text, technical charts, line art, or transparent graphics. Select JPG if your document contains photographs and you want smaller file sizes.</p>
+      </li>
+      <li class="step-item">
+        <h4>Render In-Browser</h4>
+        <p>Click "Convert PDF to Images". Watch the live progress indicator as each page is rendered onto an off-screen canvas in local memory.</p>
+      </li>
+      <li class="step-item">
+        <h4>Download Images</h4>
+        <p>The rendered image files download automatically to your device, ready for immediate publishing or presentation embedding.</p>
+      </li>
+    </ol>
+  </article>
+
+  <h2 class="section-title">Practical Real-World Example</h2>
+  <article class="guide-card">
+    <div class="example-box">
+      <h4>Scenario: Publishing a LinkedIn Carousel from an Industry Report</h4>
+      <p>
+        A marketing director has a 5-page PDF whitepaper highlighting quarterly market trends. 
+        LinkedIn carousels achieve significantly higher engagement when formatted as a sequence of high-DPI image slides:
+      </p>
+      <ul style="padding-left:20px;color:#334155;margin:8px 0;">
+        <li>Converts: 5-page PDF &rarr; 5 individual 1920x1080 resolution PNG images</li>
+        <li>Time required: Approximately 2.5 seconds on a standard laptop browser</li>
+        <li>Quality result: Crisp typography with zero blurriness or JPEG artifact noise around text labels.</li>
+      </ul>
+    </div>
+  </article>
+
+  <h2 class="section-title">Technical Considerations &amp; Differences</h2>
+  <article class="guide-card">
+    <h3>Key Differences: Raster Images vs PDF Pages:</h3>
+    <ul class="limitations-list">
+      <li><strong>Loss of Text Selectability:</strong> Once a PDF page is converted to PNG or JPG, the text characters are converted into static pixels. You cannot highlight, copy, or search the text without running an OCR tool like SMLOOPS OCR PDF.</li>
+      <li><strong>Scaling Artifacts:</strong> Unlike vector PDFs which can be zoomed infinitely without quality loss, raster images have fixed pixel dimensions. SMLOOPS renders at high-DPI scale (1.5x–2x) to ensure sharp desktop and mobile displays.</li>
+    </ul>
+  </article>
+
+  <h2 class="section-title">Frequently Asked Questions</h2>
+  <article class="guide-card">
+    <div class="faq-item">
+      <h4>Is there a file size limit for PDF to Image conversion?</h4>
+      <p>There are no arbitrary server limits. Because conversion occurs in browser memory, files up to 100MB process smoothly on modern computers.</p>
+    </div>
+    <div class="faq-item">
+      <h4>Are my confidential PDF pages uploaded to your server?</h4>
+      <p>No. Rendering happens entirely in client memory using your browser's HTML5 canvas engine. Zero bytes are uploaded to remote servers.</p>
+    </div>
+    <div class="faq-item">
+      <h4>What resolution are the extracted images?</h4>
+      <p>SMLOOPS renders pages at high-resolution default settings (150 to 300 effective DPI), delivering crisp typography suitable for digital displays and social sharing.</p>
+    </div>
+  </article>
+
+  <a class="back" href="index.html#learn">&larr; Back to all SMLOOPS Guides &amp; Tools</a>
+</main>
+
+<footer>
+  <div class="footer-links">
+    <a href="index.html">Home</a>
+    <a href="about.html">About Us</a>
+    <a href="contact.html">Contact Us</a>
+    <a href="privacy.html">Privacy Policy</a>
+    <a href="terms.html">Terms of Service</a>
+    <a href="disclaimer.html">Disclaimer</a>
+  </div>
+  <div>&copy; 2026 SMLOOPS. All Rights Reserved. &bull; Designed &amp; Developed By Shahanur Mollah.</div>
+</footer>
+
+</body>
+</html>
