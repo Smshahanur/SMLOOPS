@@ -1,6 +1,0 @@
-{
-  "name": "SMLOOPS",
-  "description": "Privacy-focused browser-based PDF and digital productivity tools with comprehensive in-depth guides and client-side processing.",
-  "requestFramePermissions": [],
-  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
-}
